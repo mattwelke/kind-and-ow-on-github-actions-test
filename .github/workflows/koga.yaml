@@ -28,14 +28,14 @@ jobs:
       - name: Install wsk CLI
         run: |
           wget https://github.com/apache/openwhisk-cli/releases/download/1.2.0/OpenWhisk_CLI-1.2.0-linux-amd64.tgz
-          tar zxvf -O test OpenWhisk_CLI-1.2.0-linux-amd64.tgz
+          tar zxvf OpenWhisk_CLI-1.2.0-linux-amd64.tgz
 
       - uses: engineerd/setup-kind@v0.5.0
         with:
           skipClusterCreation: true
 
       # Runs a single command using the runners shell
-      - name: Setup
+      - id: create_kind_cluster
         run: |
           kind create cluster --config kind-cluster.yaml
 
@@ -47,6 +47,12 @@ jobs:
 
           echo "Worker internal IP: $WORKER_INTERNAL_IP"
 
+          echo "::set-output name=worker_internal_ip::$WORKER_INTERNAL_IP"
+
+      - name: Install OpenWhisk into kind cluster
+        env:
+          WORKER_INTERNAL_IP: {{ steps.create_kind_cluster.outputs.worker_internal_ip }}
+        run: |
           echo "Starting OpenWhisk install into kind cluster..."
 
           OW_YAML=templated/mycluster.yaml
@@ -66,14 +72,15 @@ jobs:
           
           echo "Finished waiting for OpenWhisk install to finish."
 
-          echo "Setting up wsk CLI."
-
-          WSK_CMD="./wsk -i"
+      - name: Set up wsk CLI
+        env:
+          WSK_CMD: "./wsk -i"
+        run: |
           $WSK_CMD property set --apihost "localhost:31001"
           $WSK_CMD property set --auth 23bc46b1-71f6-4ed5-8c54-816aa4f8c502:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
 
-          echo "Creating sample action..."
-          $WSK_CMD action create hello "sample-action/main.js"
-
-          echo "Invoking sample action..."
+      - name: Create sample action
+        env:
+          WSK_CMD: "./wsk -i"
+        run: |
           $WSK_CMD action invoke hello --blocking
