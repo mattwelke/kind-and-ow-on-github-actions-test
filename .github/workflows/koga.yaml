@@ -71,7 +71,7 @@ jobs:
           POD_STATUS_RUNNING="kubectl get pods --field-selector=status.phase!=Running --all-namespaces"
           POD_STATUS_COMPLETED="kubectl get pods --field-selector=status.phase!=Completed --all-namespaces"
           
-          while [ "$($POD_STATUS_RUNNING)$($POD_STATUS_COMPLETED)" -ne "" ]
+          while [ $(kubectl get pod --all-namespaces | grep owdev-install-packages | awk '{print $4}') -ne "Completed" ]
           do
             echo "OpenWhisk install not complete yet. Waiting..."
             sleep 10
