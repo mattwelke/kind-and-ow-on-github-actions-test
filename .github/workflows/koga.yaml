@@ -23,12 +23,14 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - uses: azure/setup-helm@v1
+
       - uses: engineerd/setup-kind@v0.5.0
         with:
           skipClusterCreation: true
 
       # Runs a single command using the runners shell
-      - name: Run setup script
+      - name: Setup
         run: |
           kind create cluster --config kind-cluster.yaml
 
@@ -39,3 +41,22 @@ jobs:
           WORKER_INTERNAL_IP=$(kubectl describe node kind-worker | grep InternalIP: | awk '{print $2}')
 
           echo "Worker internal IP: $WORKER_INTERNAL_IP"
+
+          echo "Starting OpenWhisk install into kind cluster..."
+
+          OW_YAML=templated/mycluster.yaml
+
+          cat ow-cluster.template.yaml \
+            | sed "s/<INTERNAL_IP>/$WORKER_INTERNAL_IP/g" \
+            > $OW_YAML
+
+          # Install from Helm
+          helm repo add openwhisk https://openwhisk.apache.org/charts
+          helm repo update
+          helm install owdev openwhisk/openwhisk -n openwhisk --create-namespace -f $OW_YAML
+
+          echo "OpenWhisk install into kind cluster started. Waiting 6 minutes for all pods to be Completed or Running..."
+          
+          sleep 360
+          
+          echo "Finished waiting."
