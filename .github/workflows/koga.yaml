@@ -68,28 +68,16 @@ jobs:
 
           echo "OpenWhisk install into kind cluster started. Waiting 6 minutes for all pods to be Completed or Running..."
 
-          function status_nodes_pods() {
-            echo "$1 minute(s) passed so far."
-            echo "Status of nodes:"
-            kubectl get node -o wide
-            echo "Status of pods:"
-            kubectl get pod -o wide --all-namespaces
-          }
+          POD_STATUS_RUNNING="kubectl get pods --field-selector=status.phase!=Running --all-namespaces"
+          POD_STATUS_COMPLETED="kubectl get pods --field-selector=status.phase!=Completed --all-namespaces"
+          
+          while [ "$($POD_STATUS_RUNNING)$($POD_STATUS_COMPLETED)" -ne "" ]
+          do
+            echo "OpenWhisk install not complete yet. Waiting..."
+            sleep 10
+          done
 
-          sleep 60
-          status_nodes_pods 1
-          sleep 60
-          status_nodes_pods 2
-          sleep 60
-          status_nodes_pods 3
-          sleep 60
-          status_nodes_pods 4
-          sleep 60
-          status_nodes_pods 5
-          sleep 60
-          status_nodes_pods 6
-
-          echo "Finished waiting for OpenWhisk install."
+          echo "Finished waiting for OpenWhisk install to complete."
 
       - name: Set up wsk CLI
         env:
