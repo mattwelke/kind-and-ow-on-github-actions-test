@@ -55,16 +55,10 @@ jobs:
         run: |
           echo "Starting OpenWhisk install into kind cluster..."
 
-          OW_YAML=templated/mycluster.yaml
-
-          cat ow-cluster.template.yaml \
-            | sed "s/<INTERNAL_IP>/$WORKER_INTERNAL_IP/g" \
-            > $OW_YAML
-
           # Install from Helm
           helm repo add openwhisk https://openwhisk.apache.org/charts
           helm repo update
-          helm install owdev openwhisk/openwhisk -n openwhisk --create-namespace -f $OW_YAML
+          helm install owdev openwhisk/openwhisk -n openwhisk --create-namespace
 
           echo "OpenWhisk install into kind cluster started. Waiting 6 minutes for all pods to be Completed or Running..."
 
