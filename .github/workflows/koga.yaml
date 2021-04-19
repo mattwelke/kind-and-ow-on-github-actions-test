@@ -70,9 +70,6 @@ jobs:
             -f $OW_YAML
 
           echo "OpenWhisk install into kind cluster started. Waiting for all pods to be Completed or Running..."
-
-          POD_STATUS_RUNNING="kubectl get pods --field-selector=status.phase!=Running --all-namespaces"
-          POD_STATUS_COMPLETED="kubectl get pods --field-selector=status.phase!=Completed --all-namespaces"
           
           while [ "$(kubectl get pod --all-namespaces | grep owdev-install-packages | awk '{print $4}')" != "Completed" ]
           do
