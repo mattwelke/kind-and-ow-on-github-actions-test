@@ -66,17 +66,15 @@ jobs:
           helm repo update
           helm install owdev openwhisk/openwhisk -n openwhisk --create-namespace -f $OW_YAML
 
-          echo "OpenWhisk install into kind cluster started. Waiting 6 minutes for all pods to be Completed or Running..."
+          echo "OpenWhisk install into kind cluster started. Waiting 10 minutes for all pods to be Completed or Running..."
           
-          sleep 360
+          sleep 600
 
-          echo "6 minutes has elapsed."
+          echo "Finished waiting 10 minutes."
           echo "Status of nodes:"
           kubectl get nodes -o wide
           echo "Status of pods:"
           kubectl get pods -o wide
-          
-          echo "Finished waiting for OpenWhisk install to finish."
 
       - name: Set up wsk CLI
         env:
