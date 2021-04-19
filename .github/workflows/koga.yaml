@@ -55,24 +55,33 @@ jobs:
         run: |
           echo "Starting OpenWhisk install into kind cluster..."
 
+          OW_YAML=templated/mycluster.yaml
+
+          cat ow-cluster.template.yaml \
+            | sed "s/<INTERNAL_IP>/$WORKER_INTERNAL_IP/g" \
+            > $OW_YAML
+
           # Install from Helm
           helm repo add openwhisk https://openwhisk.apache.org/charts
           helm repo update
-          helm install owdev openwhisk/openwhisk -n openwhisk --create-namespace
+          helm install owdev openwhisk/openwhisk \
+            -n openwhisk \
+            --create-namespace \
+            -f $OW_YAML
 
-          echo "OpenWhisk install into kind cluster started. Waiting 6 minutes for all pods to be Completed or Running..."
+          echo "OpenWhisk install into kind cluster started. Waiting for all pods to be Completed or Running..."
 
           POD_STATUS_RUNNING="kubectl get pods --field-selector=status.phase!=Running --all-namespaces"
           POD_STATUS_COMPLETED="kubectl get pods --field-selector=status.phase!=Completed --all-namespaces"
           
           while [ "$(kubectl get pod --all-namespaces | grep owdev-install-packages | awk '{print $4}')" != "Completed" ]
           do
-            echo "OpenWhisk install not complete yet. Waiting..."
-            sleep 10
+            echo "OpenWhisk install not complete yet. Waiting 30 seconds..."
+            sleep 30
             OW_JOB_NAME=owdev-install-packages
             echo "$OW_JOB_NAME job status:"
-            kubectl get pod --all-namespaces -o wide | head -1
-            kubectl get pod --all-namespaces -o wide | grep $OW_JOB_NAME
+            kubectl get pod --all-namespaces | head -1
+            kubectl get pod --all-namespaces | grep $OW_JOB_NAME
           done
 
           echo "Finished waiting for OpenWhisk install to complete."
