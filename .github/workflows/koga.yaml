@@ -34,8 +34,8 @@ jobs:
         with:
           skipClusterCreation: true
 
-      # Runs a single command using the runners shell
-      - id: create_kind_cluster
+      - name: Create kind cluster
+        id: create_kind_cluster
         run: |
           kind create cluster --config kind-cluster.yaml
 
@@ -69,6 +69,12 @@ jobs:
           echo "OpenWhisk install into kind cluster started. Waiting 6 minutes for all pods to be Completed or Running..."
           
           sleep 360
+
+          echo "6 minutes has elapsed."
+          echo "Status of nodes:"
+          kubectl get nodes -o wide
+          echo "Status of pods:"
+          kubectl get pods -o wide
           
           echo "Finished waiting for OpenWhisk install to finish."
 
