@@ -23,6 +23,19 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - uses: engineerd/setup-kind@v0.5.0
+        with:
+          skipClusterCreation: true
+
       # Runs a single command using the runners shell
       - name: Run setup script
-        run: ./setup.sh
+        run: |
+          kind create cluster --config kind-cluster.yaml
+
+          kubectl label node kind-worker openwhisk-role=core
+          kubectl label node kind-worker2 openwhisk-role=invoker
+
+          # determine the internalIP of a kind worker node
+          WORKER_INTERNAL_IP=$(kubectl describe node kind-worker | grep InternalIP: | awk '{print $2}')
+
+          echo "Worker internal IP: $WORKER_INTERNAL_IP"
