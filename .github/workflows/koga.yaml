@@ -69,6 +69,8 @@ jobs:
           do
             echo "OpenWhisk install not complete yet. Waiting..."
             sleep 10
+            echo "Pod statuses:"
+            kubectl get pod --all-namespaces -o wide
           done
 
           echo "Finished waiting for OpenWhisk install to complete."
