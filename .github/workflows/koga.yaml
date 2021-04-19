@@ -87,4 +87,10 @@ jobs:
         env:
           WSK_CMD: "./wsk -i"
         run: |
+          $WSK_CMD action create hello "sample-action/main.js"
+
+      - name: Invoke sample action
+        env:
+          WSK_CMD: "./wsk -i"
+        run: |
           $WSK_CMD action invoke hello --blocking
