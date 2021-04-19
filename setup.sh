@@ -9,3 +9,4 @@ kubectl label node kind-worker2 openwhisk-role=invoker
 WORKER_INTERNAL_IP=$(kubectl describe node kind-worker | grep InternalIP: | awk '{print $2}')
 
 echo "Worker internal IP: $WORKER_INTERNAL_IP"
+
