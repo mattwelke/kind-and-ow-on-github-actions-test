@@ -51,7 +51,7 @@ jobs:
 
       - name: Install OpenWhisk into kind cluster
         env:
-          WORKER_INTERNAL_IP: {{ steps.create_kind_cluster.outputs.worker_internal_ip }}
+          WORKER_INTERNAL_IP: ${{ steps.create_kind_cluster.outputs.worker_internal_ip }}
         run: |
           echo "Starting OpenWhisk install into kind cluster..."
 
